@@ -1,3 +1,7 @@
+# pour avoir la bdd initialisée avec docker
+docker-compose -f backend/docker-compose.yml -p echolink-back up -d --build
+
+
 ## pour lancer le backend (node express) : 
 # au préalable :
 créer une bdd mysql ainsi qu'un utilisateur et mettre les variables de connexion dans le fichier .env avant de lancer la commande. Le serveur va créer les tables à son lancement si celles ci n'existent pas encore.
