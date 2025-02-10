@@ -19,17 +19,11 @@ const connectDB = async () => {
     const conn = await mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      // other options like useCreateIndex, useFindAndModify (if needed for your Mongoose version)
     });
-   /* const conn = await mongoose.connect("mongodb://mongo:27017/echolink", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      // other options like useCreateIndex, useFindAndModify (if needed for your Mongoose version)
-    });*/
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
-    process.exit(1); // Exit process with failure
+    process.exit(1);
   }
 };
 

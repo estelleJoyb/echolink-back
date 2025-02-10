@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "cd backend && node -r dotenv/config server.js",
+    "start": "cd backend && node -r dotenv/config server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,25 +1,30 @@
 version: '3.9'
 services:
-    backend:
-      build:
-        context:  D:/echo-link/echolink-back
-        dockerfile: ./backend/Dockerfile
-      ports:
-        - "4000:4000"
-      volumes:
-        - .:/app
-      environment:
-        - MONGO_URI=mongodb://mongo:27017/echolink
-      depends_on:
-        - mongo
-
-    mongo:
-      image: mongo:6.0
-      container_name: mongodb
-      ports:
-        - "27017:27017"
-      volumes:
-        - mongo-data:/data/db
+  backend:
+    build:
+      context: D:/echo-link/echolink-back
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/echolink
+    depends_on:
+      mongo:
+        condition: service_healthy  # Ensures MongoDB is ready before starting
+  mongo:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongo:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-    mongo-data:
+  mongo-data:

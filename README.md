@@ -1,6 +1,7 @@
 # pour avoir la bdd initialisée avec docker
-docker-compose -f backend/docker-compose.yml -p echolink-back up -d --build
-
+cd backend
+docker-compose build
+docker-compose up 
 
 ## pour lancer le backend (node express) : 
 # au préalable :

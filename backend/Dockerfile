@@ -1,6 +1,6 @@
 FROM node:16
-WORKDIR /app
-COPY package*.json ./
+WORKDIR /
+COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
 EXPOSE 4000
