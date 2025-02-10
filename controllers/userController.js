@@ -19,7 +19,7 @@ const usersController = {
       res.status(500).send("Erreur lors de la récupération des users depuis la base de données");
     }
   },
-  getUserConversion: async (req, res) => {
+  getUserConversations: async (req, res) => {
     try {
       const conversations = await Conversation.find({ participants: req.params.userId }).populate("participants", "nom prenom image").populate("lastMessage");
       res.json(conversations);
