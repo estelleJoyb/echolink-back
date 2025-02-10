@@ -10,7 +10,7 @@ const register = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { image, nom, prenom, email, tel, password } = req.body;
+    var { image, nom, prenom, email, tel, password } = req.body;
 
     let user = await User.findOne({ email });
     if (user) {
@@ -83,7 +83,3 @@ const login = async (req, res) => {
 };
 
 module.exports = { register, login };
-
-/*
-curl --location 'http://localhost:5000/api/auth/register' --header 'Content-Type: application/json' --data '{"name": "Another User","email": "anotheruser@example.com",  "password": "anotherPassword456"}'
-*/
