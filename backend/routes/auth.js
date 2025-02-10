@@ -3,7 +3,6 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { check } = require('express-validator');
 
-// inscription
 router.post(
   '/register',
   [
@@ -16,7 +15,6 @@ router.post(
   authController.register
 );
 
-// connexion
 router.post(
   '/login',
   [
