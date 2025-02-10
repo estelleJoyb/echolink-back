@@ -1,16 +1,11 @@
-const User = require("../models/UserModel");
+const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 
 const register = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    var { image, nom, prenom, email, tel, password } = req.body;
+    var {nom, prenom, email, tel, password } = req.body;
 
     let user = await User.findOne({ email });
     if (user) {
@@ -20,7 +15,7 @@ const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10); // Use bcrypt to hash
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    image = image ?? "https://www.dz-techs.com/wp-content/uploads/2019/07/Facebook-Anonymous-min-DzTechs.jpg";
+    var image = "https://www.dz-techs.com/wp-content/uploads/2019/07/Facebook-Anonymous-min-DzTechs.jpg";
 
     user = new User({
       image,

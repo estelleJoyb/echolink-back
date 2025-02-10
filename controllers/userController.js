@@ -1,5 +1,5 @@
-const Conversation = require("../models/ConversationModel");
-const { Users } = require("../models/usersModel");
+const Conversation = require("../models/conversationModel");
+const Users = require("../models/userModel");
 
 const usersController = {
   getUsers: async (req, res) => {
