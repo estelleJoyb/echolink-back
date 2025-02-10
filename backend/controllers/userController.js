@@ -1,3 +1,4 @@
+const Conversation = require("../models/ConversationModel");
 const { Users } = require("../models/usersModel");
 
 const usersController = {
@@ -16,6 +17,14 @@ const usersController = {
     } catch (error) {
       console.error(error);
       res.status(500).send("Erreur lors de la récupération des users depuis la base de données");
+    }
+  },
+  getUserConversion: async (req, res) => {
+    try {
+      const conversations = await Conversation.find({ participants: req.params.userId }).populate("participants", "nom prenom image").populate("lastMessage");
+      res.json(conversations);
+    } catch (error) {
+      res.status(500).json({ error: "Erreur lors du chargement des conversations" });
     }
   },
 };

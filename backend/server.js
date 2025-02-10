@@ -1,10 +1,11 @@
 const express = require('express');
 const WebSocket = require('ws');
-const authRoutes = require('./routes/authRoute');
-const usersRoutes = require('./routes/usersRoute');
 const connectDB = require('./config/db');
 const cors = require("cors");
 const socketService = require('./services/socketService');
+const authRoutes = require('./routes/authRoute');
+const usersRoutes = require('./routes/usersRoute');
+const conversationRoutes = require('./routes/conversationRoute');
 require("dotenv").config();
 
 const app = express();
@@ -29,6 +30,7 @@ connectDB().then(() => {
   console.log('Error connecting to MongoDB', err);
 });
 
-// Configurer les routes API
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/conversations', conversationRoutes);
+
