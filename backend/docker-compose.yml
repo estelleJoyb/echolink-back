@@ -2,7 +2,7 @@ version: '3.9'
 services:
   backend:
     build:
-      context: D:/echo-link/echolink-back
+      context: /Users/jeremydefuentes/Documents/ESGI/EchoLink/echolink-back
       dockerfile: ./backend/Dockerfile
     ports:
       - "4000:4000"
@@ -12,10 +12,10 @@ services:
       - MONGO_URI=mongodb://mongo:27017/echolink
     depends_on:
       mongo:
-        condition: service_healthy  # Ensures MongoDB is ready before starting
+        condition: service_healthy
   mongo:
     image: mongo:6.0
-    container_name: mongodb
+    container_name: mongodb_echolink
     ports:
       - "27017:27017"
     volumes:

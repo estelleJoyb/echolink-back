@@ -38,6 +38,7 @@ app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
 const express = require('express');
 const authRoutes = require('./routes/auth');
+const usersRoutes = require('./routes/users');
 const connectDB = require('./config/db'); // Import the MongoDB connection function
 require("dotenv").config();
 
@@ -47,8 +48,9 @@ const app = express();
 connectDB().then(r => console.log(r));  // Call the async function to connect
 
 
-
 app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 // ...
