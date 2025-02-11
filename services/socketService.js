@@ -1,87 +1,102 @@
-const Message = require('../models/messageModel');
-const Conversation = require('../models/conversationModel');
+const jwt = require('jsonwebtoken');
 
-module.exports = function(wss) {
-  const users = new Map();
+class SocketService {
+    constructor() {
+        this.io = null;
+        this.connectedUsers = new Map();
+    }
 
-  wss.on('connection', (ws) => {
-    let userId = null;
+    init(server) {
+        this.io = require('socket.io')(server, {
+            cors: {
+                origin: 'http://localhost:5173',
+                methods: ["GET", "POST"],
+                credentials: true
+            },
+            transports: ['websocket', 'polling']
+        });
 
-    ws.on('message', async (message) => {
-      try {
-        const data = JSON.parse(message);
-        
-        switch (data.type) {
-          case 'connect':
-            userId = data.userId;
-            users.set(userId, ws);
-            console.log(`User ${userId} connected`);
-            break;
+        // Middleware for authentication
+        this.io.use(async (socket, next) => {
+            try {
+                const token = socket.handshake.auth.token;
+                
+                if (!token) {
+                    return next(new Error('No token provided'));
+                }
 
-          case 'new_conversation':
-            const { sender, recipient, conversation } = data;
-            
-            // Notify recipient about new conversation
-            if (users.has(recipient)) {
-              users.get(recipient).send(JSON.stringify({
-                type: 'new_conversation',
-                conversation
-              }));
+                // Verify token using your JWT_SECRET
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
+                
+                // Attach user data to socket
+                socket.userId = decoded.user.id;
+                socket.user = decoded.user;
+                
+                next();
+            } catch (err) {
+                console.error('Socket authentication error:', err.message);
+                next(new Error('Authentication error: ' + err.message));
             }
-            break;
+        });
 
-          case 'private_message':
-            const { text } = data;
-            const message = new Message({
-              conversation: data.conversation,
-              sender: data.sender,
-              text,
-              createdAt: new Date()
+        this.io.on('connection', (socket) => {
+            console.log(`User connected: ${socket.userId}`);
+            this.connectedUsers.set(socket.userId, socket.id);
+
+            // Join user's own room
+            socket.join(socket.userId);
+
+            socket.on('disconnect', () => {
+                console.log(`User disconnected: ${socket.userId}`);
+                this.connectedUsers.delete(socket.userId);
             });
-            
-            await message.save();
 
-            // Update conversation's last message
-            await Conversation.findByIdAndUpdate(
-              data.conversation,
-              { 
-                lastMessage: message._id,
-                updatedAt: new Date()
-              }
-            );
+            // Handle joining conversation rooms
+            socket.on('join_conversation', (conversationId) => {
+                socket.join(conversationId);
+                console.log(`User ${socket.userId} joined conversation ${conversationId}`);
+            });
 
-            const populatedMessage = await Message.findById(message._id)
-              .populate('sender', 'nom prenom image');
+            socket.on('leave_conversation', (conversationId) => {
+                socket.leave(conversationId);
+                console.log(`User ${socket.userId} left conversation ${conversationId}`);
+            });
+        });
 
-            // Send to recipient
-            if (users.has(data.recipient)) {
-              users.get(data.recipient).send(JSON.stringify({
-                type: 'private_message',
-                message: populatedMessage
-              }));
-            }
+        console.log("WebSocket server initialized with authentication");
+    }
 
-            // Send confirmation to sender
-            ws.send(JSON.stringify({
-              type: 'message_sent',
-              message: populatedMessage
-            }));
-            break;
+    // Get socket instance
+    getIO() {
+        if (!this.io) {
+            throw new Error("Socket.io not initialized.");
         }
-      } catch (error) {
-        console.error('WebSocket error:', error);
-        ws.send(JSON.stringify({ 
-          type: 'error', 
-          message: 'An error occurred' 
-        }));
-      }
-    });
+        return this.io;
+    }
 
-    ws.on('close', () => {
-      if (userId) {
-        users.delete(userId);
-        console.log(`User ${userId} disconnected`);
-      }
-    });
-  });
-};
+    // Send message to specific user
+    sendToUser(userId, event, data) {
+        const socketId = this.connectedUsers.get(userId);
+        if (socketId) {
+            this.io.to(socketId).emit(event, data);
+        }
+    }
+
+    // Send message to multiple users
+    sendToUsers(userIds, event, data) {
+        userIds.forEach(userId => {
+            this.sendToUser(userId, event, data);
+        });
+    }
+
+    // Join conversation room
+    joinConversation(userId, conversationId) {
+        const socketId = this.connectedUsers.get(userId);
+        if (socketId) {
+            this.io.sockets.sockets.get(socketId)?.join(conversationId);
+        }
+    }
+}
+
+const socketService = new SocketService();
+module.exports = socketService;

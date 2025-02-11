@@ -4,7 +4,10 @@ const router = express.Router();
 
 router.get('/:conversationId', conversationController.getConversationById);
 
-router.post('/create', conversationController.createConversation);
+router.get('/:conversationId/messages', conversationController.getMessagesByConversationId);
 
+router.post('/:conversationId', conversationController.sendMessage);
+
+router.post('/', conversationController.createConversation);
 
 module.exports = router;

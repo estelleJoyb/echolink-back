@@ -27,6 +27,7 @@
     "mysql2": "^3.11.0",
     "react-router-dom": "^6.26.1",
     "sequelize": "^6.37.3",
+    "socket.io": "^4.8.1",
     "ws": "^8.18.0"
   },
   "devDependencies": {
