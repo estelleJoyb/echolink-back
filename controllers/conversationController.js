@@ -7,7 +7,6 @@ const conversationController = {
     try {
       const { name, sender, recipient } = req.body;
 
-      // Check if conversation already exists
       let conversation = await Conversation.findOne({
         participants: { $all: [sender, recipient] }
       });
