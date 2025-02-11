@@ -29,9 +29,9 @@ const conversationController = {
 
       // Notify all participants about the new conversation
       socketService.sendToUsers(
-        conversation.participants.map((p) => p.toString()),
-        "new_conversation",
-        populatedConversation
+          conversation.participants.map((p) => p.toString()),
+          "new_conversation",
+          populatedConversation
       );
 
       res.status(201).json(populatedConversation);
@@ -44,7 +44,7 @@ const conversationController = {
   sendMessage: async (req, res) => {
     try {
       const conversationId = req.params.conversationId;
-      const { sender, text } = req.body;
+      const { user, text } = req.body;
 
       let conversation = await Conversation.findById(conversationId).populate("participants", "_id");
 
@@ -54,7 +54,7 @@ const conversationController = {
 
       const message = new Message({
         conversation: conversationId,
-        sender,
+        user,
         text,
         date: Date.now(),
       });
@@ -67,13 +67,13 @@ const conversationController = {
 
       // Populate the message with sender details
       const populatedMessage = await Message.findById(message._id)
-      
+
       // Get socket instance
       const io = socketService.getIO();
 
       // Emit to all participants in the conversation
       conversation.participants.forEach((participant) => {
-        if(participant._id != sender){
+        if(participant._id !== user){
           io.to(participant._id.toString()).emit("new_message", {
             conversationId,
             message: populatedMessage,

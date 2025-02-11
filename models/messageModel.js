@@ -4,12 +4,10 @@ const messageSchema = new mongoose.Schema({
   forum: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Forum',
-    required: true
   },
   conversation: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Conversation',
-    required: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -24,10 +22,6 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  date: {
-    type: Date,
-    default: Date.now,
-  }
 
 }, { timestamps: true });
 

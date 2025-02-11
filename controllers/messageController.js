@@ -4,7 +4,7 @@ module.exports.sendPrivateMessage = (users, data, currentUserId) => {
   if (users[recipientId]) {
     const message = JSON.stringify({
       type: 'private_message',
-      sender: currentUserId,
+      user: currentUserId,
       text: text
     });
     users[recipientId].send(message);

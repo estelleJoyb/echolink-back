@@ -40,14 +40,12 @@ exports.login = async (req, res) => {
 
 module.exports  = (req, res, next) => {
   const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-  console.log("token", token);
   if (!token) {
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
   try {
     jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
-      console.log("decoded", decoded);
       if (error) {
         console.error(error.message);
         return res.status(401).json({ msg: 'Token is not valid' });

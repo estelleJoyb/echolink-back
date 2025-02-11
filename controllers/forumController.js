@@ -23,7 +23,6 @@ const forumController = {
                 thematique,
                 zone_geographique,
             });
-console.log("new forum", newForum);
             const savedForum = await newForum.save();
             res.status(201).json(savedForum);
         } catch (error) {
@@ -54,14 +53,14 @@ console.log("new forum", newForum);
             res.status(500).json({ message: "Error fetching Forum" });
         }
     },
-    deleteForum: async (req, res) => { // Corrected deleteForum method
+    deleteForum: async (req, res) => {
         try {
-            const { id } = req.params; // Use req.params.id to get the forum ID
+            const { id } = req.params;
             const forum = await Forum.findById(id);
             if (!forum) {
                 return res.status(404).json({ error: 'Forum non trouvé' });
             }
-            await Forum.findByIdAndDelete(id); // Correctly delete the forum
+            await Forum.findByIdAndDelete(id);
             res.status(204).json({ message: 'Forum supprimé avec succès' });
 
         } catch (error) {
@@ -69,47 +68,35 @@ console.log("new forum", newForum);
             res.status(500).json({ error: 'Erreur lors de la suppression du Forum' });
         }
     },
-    postMessage: async (req, res) => {
+    sendMessage: async (req, res) => {
         try {
-            const { forumId } = req.params;
-            const { text } = req.body;
-            const userId = req.user.id; // Assuming you have authentication middleware that sets req.user
+            const { forumId } = req.params.forumId;
+            const { user, text } = req.body;
+            //const userId = req.user.id;
 
-            // Validation
-            if (!forumId || !text) {
+            if (!forumId || !text ) {
                 return res.status(400).json({ error: 'Forum ID and message text are required' });
             }
 
-            // Find the forum
             const forum = await Forum.findById(forumId);
             if (!forum) {
                 return res.status(404).json({ error: 'Forum not found' });
             }
 
-            const user = await User.findById(userId);
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-
-            // Create the new message
             const newMessage = new Message({
                 forum: forumId,
-                user: userId, // Associate the message with the user
+                user,
                 text,
+                date: Date.now(),
             });
 
-            // Save the message
-            const savedMessage = await newMessage.save();
+           await newMessage.save();
 
-
-            // Update the forum's lastMessage (optional, but useful)
-            forum.lastMessage = savedMessage._id;
+            forum.lastMessage = newMessage._id;
             await forum.save();
+            const populatedMessage = await Message.findById(savedMessage._id);
 
-            // Populate the user information in the saved message (optional, but recommended)
-            const populatedMessage = await Message.findById(savedMessage._id).populate("user", "nom prenom image"); // Adjust fields as needed
-
-
+            // todo find a way to emit to all participants
 
             res.status(201).json(populatedMessage);
         } catch (error) {
@@ -117,7 +104,7 @@ console.log("new forum", newForum);
             res.status(500).json({ error: 'Erreur serveur lors de l\'envoi du message' });
         }
     },
-    getForumMessages: async (req, res) => {
+    getMessagesByForumId: async (req, res) => {
       try {
           const {forumId} = req.params;
           if(!forumId){
