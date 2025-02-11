@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Configuration CORS
 app.use(cors({
-  origin: 'http://localhost:5173', // Frontend URL
+  origin: 'http://localhost:5173',
   credentials: true
 }));
 
@@ -35,5 +35,7 @@ connectDB().then(() => {
 
 // Routes API classiques
 app.use('/api/auth', authRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/conversations', conversationRoutes);
+  app.use('/api/users', auth, usersRoutes);
+  app.use('/api/conversations', auth, conversationRoutes);
+  app.use('/api/forums', auth, forumRoutes);
+
