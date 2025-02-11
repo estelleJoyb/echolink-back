@@ -4,19 +4,16 @@ const ForumSchema = new mongoose.Schema({
     titre: {
         type: String,
         required: true,
+        unique: true,
     },
     thematique: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
+        ref: 'Thematique',
     },
     zone_geographique: {
         type: String,
         required: true,
-    },
-    lastMessage: {
-        type: String,
-        required: true,
-        unique: true,
     },
 }, { timestamps: true });
 

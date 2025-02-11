@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+require("dotenv").config();
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -37,18 +38,27 @@ exports.login = async (req, res) => {
   }
 };
 
-module.exports = function (req, res, next) {
-  const token = req.header("Authorization");
-  if (!token || !token.startsWith("Bearer ")) {
-    return res.status(401).json({ msg: "No token, authorization denied" });
+module.exports  = (req, res, next) => {
+  const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+  console.log("token", token);
+  if (!token) {
+    return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
   try {
-    const actualToken = token.split(" ")[1];
-    const decoded = jwt.verify(actualToken, process.env.JWT_SECRET);
-    req.user = decoded.user;
-    next();
+    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+      console.log("decoded", decoded);
+      if (error) {
+        console.error(error.message);
+        return res.status(401).json({ msg: 'Token is not valid' });
+      } else {
+
+        req.user = decoded.user;
+        next();
+      }
+    });
   } catch (err) {
-    res.status(401).json({ msg: "Token is not valid" });
+    console.error('something wrong with auth middleware');
+    res.status(500).json({ msg: 'Server Error' });
   }
 };

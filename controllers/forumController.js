@@ -22,9 +22,8 @@ const forumController = {
                 titre,
                 thematique,
                 zone_geographique,
-                lastMessage: null,
             });
-
+console.log("new forum", newForum);
             const savedForum = await newForum.save();
             res.status(201).json(savedForum);
         } catch (error) {
