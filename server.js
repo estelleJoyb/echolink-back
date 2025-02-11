@@ -6,6 +6,9 @@ const authRoutes = require('./routes/authRoute');
 const usersRoutes = require('./routes/usersRoute');
 const conversationRoutes = require('./routes/conversationRoute');
 require('dotenv').config();
+const forumRoutes = require('./routes/forumRoute');
+const auth = require('./middleware/authMiddleware');
+
 
 const app = express();
 app.use(express.json());

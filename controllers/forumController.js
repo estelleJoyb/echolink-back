@@ -1,5 +1,6 @@
 const Forum = require("../models/forumModel");
 const Thematique = require("../models/thematiqueModel");
+const Message = require("../models/messageModel");
 
 
 const forumController = {
@@ -116,6 +117,23 @@ const forumController = {
             console.error("Error posting message:", error);
             res.status(500).json({ error: 'Erreur serveur lors de l\'envoi du message' });
         }
+    },
+    getForumMessages: async (req, res) => {
+      try {
+          const {forumId} = req.params;
+          if(!forumId){
+              return res.status(400).json({error: 'Id Forum obligatoire'});
+          }
+          const forum = await Forum.findById(forumId);
+          if(!forum){
+              return res.status(404).json({error: 'Forum non trouvé'});
+          }
+          const messages = await Message.find({forum: forumId, conversation: null});
+          res.json(messages);
+      }  catch (error){
+          console.error("Error getting forum messages:", error);
+          return res.status(500).json({error: 'Erreur serveur lors du chargement des messages'});
+      }
     },
 };
 
