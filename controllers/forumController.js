@@ -1,6 +1,7 @@
 const Forum = require("../models/forumModel");
 const Thematique = require("../models/thematiqueModel");
 const Message = require("../models/messageModel");
+const User = require('../models/userModel');
 const socketService = require("../services/socketService");
 
 
@@ -98,10 +99,16 @@ const forumController = {
             const populatedMessage = await Message.findById(newMessage._id);
             // Get socket instance
             const io = socketService.getIO();
-            // Emit in the conversation
-            io.to(user).emit("new_message", {
-                forumId,
-                message: populatedMessage,
+
+            // Emit to all users
+            const users = await User.find();
+            users.forEach((u) => {
+                if(u._id !== user){
+                    io.to(u._id.toString()).emit("new_message", {
+                        forumId,
+                        message: populatedMessage,
+                    });
+                }
             });
 
 

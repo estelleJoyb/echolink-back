@@ -34,7 +34,7 @@ connectDB().then(() => {
 });
 
   app.use('/api/auth', authRoutes);
-  app.use('/api/users', usersRoutes);
+  app.use('/api/users',auth,  usersRoutes);
   app.use('/api/conversations', conversationRoutes);
   app.use('/api/forums', auth, forumRoutes);
   app.use('/api/thematiques', auth, thematiqueRoutes);
