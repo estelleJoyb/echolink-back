@@ -27,6 +27,17 @@ const usersController = {
       res.status(500).json({ error: "Erreur lors du chargement des conversations" });
     }
   },
+  getUserById: async (req, res) => {
+    try {
+      const user = await Users.findById(req.params.userId);
+      if (!user) {
+        res.status(400).send("Utilisateur introuvable");
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ error: "Erreur lors du chargement de l'utilisateur" });
+    }
+  }
 };
 
 module.exports = usersController;
