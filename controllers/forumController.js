@@ -1,6 +1,7 @@
 const Forum = require("../models/forumModel");
 const Thematique = require("../models/thematiqueModel");
 const Message = require("../models/messageModel");
+const socketService = require("../services/socketService");
 
 
 const forumController = {
@@ -70,9 +71,8 @@ const forumController = {
     },
     sendMessage: async (req, res) => {
         try {
-            const { forumId } = req.params.forumId;
+            const { forumId } = req.params;
             const { user, text } = req.body;
-            //const userId = req.user.id;
 
             if (!forumId || !text ) {
                 return res.status(400).json({ error: 'Forum ID and message text are required' });
@@ -85,18 +85,25 @@ const forumController = {
 
             const newMessage = new Message({
                 forum: forumId,
-                user,
+               user,
                 text,
                 date: Date.now(),
             });
 
            await newMessage.save();
 
+            // Update forum's lastMessage
             forum.lastMessage = newMessage._id;
             await forum.save();
-            const populatedMessage = await Message.findById(savedMessage._id);
+            const populatedMessage = await Message.findById(newMessage._id);
+            // Get socket instance
+            const io = socketService.getIO();
+            // Emit in the conversation
+            io.to(user).emit("new_message", {
+                forumId,
+                message: populatedMessage,
+            });
 
-            // todo find a way to emit to all participants
 
             res.status(201).json(populatedMessage);
         } catch (error) {
