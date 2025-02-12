@@ -4,6 +4,7 @@ class SocketService {
     constructor() {
         this.io = null;
         this.connectedUsers = new Map();
+        this.connectedForumUsers = new Map();
     }
 
     init(server) {
@@ -60,6 +61,30 @@ class SocketService {
             socket.on('leave_conversation', (conversationId) => {
                 socket.leave(conversationId);
                 console.log(`User ${socket.userId} left conversation ${conversationId}`);
+            });
+        });
+
+        this.io.on('connectionForum', (socket) => {
+            console.log(`User connected: ${socket.userId}`);
+            this.connectedForumUsers.set(socket.userId, socket.id);
+
+            // Join user's own room
+            socket.join(socket.userId);
+
+            socket.on('disconnect', () => {
+                console.log(`User disconnected: ${socket.userId}`);
+                this.connectedForumUsers.delete(socket.userId);
+            });
+
+            // Handle joining forum rooms
+            socket.on('join_forum', (forumId) => {
+                socket.join(forumId);
+                console.log(`User ${socket.userId} joined forum ${forumId}`);
+            });
+
+            socket.on('leave_forum', (forumId) => {
+                socket.leave(forumId);
+                console.log(`User ${socket.userId} left forum ${forumId}`);
             });
         });
 
