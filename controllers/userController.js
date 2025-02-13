@@ -1,6 +1,7 @@
 const Conversation = require("../models/conversationModel");
 const Users = require("../models/userModel");
-
+const fs = require('fs');
+const path = require('path');
 const usersController = {
   getUsers: async (req, res) => {
     try {
@@ -40,10 +41,9 @@ const usersController = {
   },
   updateUserById: async (req, res) => {
     try {
-      console.log("Received FormData:", req.body);
-      console.log("Received File:", req.file);
+      const userId = req.params.userId;
+      const user = await Users.findById(userId);
 
-      const user = await Users.findById(req.params.userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -51,7 +51,20 @@ const usersController = {
       Object.assign(user, req.body);
 
       if (req.file) {
-        user.profileImage = `/uploads/${req.file.filename}`;
+        const uploadsDir = path.join(__dirname, '..', 'uploads');
+
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir);
+        }
+
+        const filename = `${userId}.png`;
+        const filePath = path.join(uploadsDir, filename);
+        if(fs.existsSync(filePath)){
+          //delete old file image
+          fs.unlinkSync(filePath);
+        }
+        fs.writeFileSync(filePath, req.file.buffer);
+        user.image = `/uploads/${filename}`;
       }
 
       await user.save();
