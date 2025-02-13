@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { timestamps: true });
+  commentaires: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Commentaire',
+  }],
+}, { timestamps: true, toJSON: { getters: true } });
 
 module.exports = mongoose.model('User', UserSchema);
