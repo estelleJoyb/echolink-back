@@ -40,34 +40,27 @@ const usersController = {
   },
   updateUserById: async (req, res) => {
     try {
-      const usr = req.body;
+      console.log("Received FormData:", req.body);
+      console.log("Received File:", req.file);
+
       const user = await Users.findById(req.params.userId);
-      if(!user){
-        return res.status(404).json({error: 'Utilisateur non trouvé'});
-      }
-      if(usr.nom){
-        user.nom = usr.nom;
-      }
-      if(usr.prenom){
-        user.prenom = usr.prenom;
-      }
-      if(usr.email){
-        user.email = usr.email;
-      }
-     if(usr.tel){
-       user.tel = usr.tel;
-     }
-      if(usr.image){
-        user.image = usr.image;
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
       }
 
-      const updatedUser = await user.save();
-      res.json(updatedUser);
-    }catch (error){
-      res.status(500).json({ error: "Erreur lors de la mise à jour de l'utilisateur" });
+      Object.assign(user, req.body);
+
+      if (req.file) {
+        user.profileImage = `/uploads/${req.file.filename}`;
+      }
+
+      await user.save();
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
-  }
-
+  },
 };
 
 module.exports = usersController;
