@@ -32,7 +32,7 @@ connectDB().then(() => {
 }).catch(err => {
   console.log('Error connecting to MongoDB', err);
 });
-
+  app.use("/uploads", express.static("uploads"));
   app.use('/api/auth', authRoutes);
   app.use('/api/users',auth,  usersRoutes);
   app.use('/api/conversations', conversationRoutes);
