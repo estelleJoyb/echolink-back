@@ -46,6 +46,7 @@ const conversationController = {
       const conversationId = req.params.conversationId;
       const { user, text } = req.body;
 
+
       let conversation = await Conversation.findById(conversationId).populate("participants", "_id");
 
       if (!conversation) {
