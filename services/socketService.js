@@ -27,7 +27,7 @@ class SocketService {
                 }
 
                 // Verify token using your JWT_SECRET
-                const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 
                 // Attach user data to socket
                 socket.userId = decoded.user.id;
