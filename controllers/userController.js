@@ -5,7 +5,7 @@ const Commentaire = require('../models/commentaireModel');
 const usersController = {
   getUsers: async (req, res) => {
     try {
-      const users = await Users.find();
+      const users = await Users.find().select('-password'); // Exclure le champ password
 
       const userPayload = users.map((user) => ({
         id: user._id,
@@ -22,7 +22,12 @@ const usersController = {
   },
   getUserConversations: async (req, res) => {
     try {
-      const conversations = await Conversation.find({ participants: req.params.userId }).populate("participants", "nom prenom image").populate("lastMessage");
+      const conversations = await Conversation.find({ participants: req.params.userId })
+        .populate({
+          path: "participants",
+          select: "nom prenom image", // Exclure password pour les participants
+        })
+        .populate("lastMessage");
       res.json(conversations);
     } catch (error) {
       res.status(500).json({ error: "Erreur lors du chargement des conversations" });
@@ -30,9 +35,9 @@ const usersController = {
   },
   getUserById: async (req, res) => {
     try {
-      const user = await Users.findById(req.params.userId);
+      const user = await Users.findById(req.params.userId).select('-password'); // Exclure password
       if (!user) {
-        res.status(400).send("Utilisateur introuvable");
+        return res.status(404).send("Utilisateur introuvable"); // Changé 400 en 404 pour cohérence
       }
       res.json(user);
     } catch (error) {
@@ -46,7 +51,7 @@ const usersController = {
 
       const user = await Users.findById(req.params.userId);
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return res.status(404).json({ error: "Utilisateur non trouvé" });
       }
 
       Object.assign(user, req.body);
@@ -56,10 +61,12 @@ const usersController = {
       }
 
       await user.save();
-      res.json(user);
+      // Renvoyer l’utilisateur sans le password
+      const updatedUser = await Users.findById(req.params.userId).select('-password');
+      res.json(updatedUser);
     } catch (error) {
-      console.error("Error updating user:", error);
-      res.status(500).json({ error: "Internal server error" });
+      console.error("Erreur lors de la mise à jour de l’utilisateur:", error);
+      res.status(500).json({ error: "Erreur interne du serveur" });
     }
   },
   addReviewToUser: async (req, res) => {
@@ -74,24 +81,23 @@ const usersController = {
         return res.status(404).json({ error: "Utilisateur non trouvé" });
       }
 
-      // Créer un nouveau commentaire
       const newComment = new Commentaire({
         reviewerId,
         rating,
         comment,
       });
 
-      // Sauvegarder le commentaire
       const savedComment = await newComment.save();
-
-      // Ajouter l’ID du commentaire au tableau commentaires de l’utilisateur
       user.commentaires.push(savedComment._id);
       await user.save();
 
-      const updatedUser = await Users.findById(userId).populate({
-        path: 'commentaires',
-        populate: { path: 'reviewerId', select: 'nom prenom' },
-      });
+      // Renvoyer l’utilisateur mis à jour sans le password
+      const updatedUser = await Users.findById(userId)
+        .select('-password')
+        .populate({
+          path: 'commentaires',
+          populate: { path: 'reviewerId', select: 'nom prenom' },
+        });
       res.json(updatedUser);
     } catch (error) {
       console.error("Erreur lors de l’ajout de l’avis:", error);
@@ -101,19 +107,20 @@ const usersController = {
   getReviews: async (req, res) => {
     try {
       const userId = req.params.userId;
-  
+
       console.log("Récupération des avis pour l'utilisateur:", userId);
-  
-      // Trouver l’utilisateur et peupler les commentaires
-      const user = await Users.findById(userId).populate({
-        path: 'commentaires',
-        populate: { path: 'reviewerId', select: 'nom prenom' }, // Inclure nom et prénom du reviewer
-      });
-  
+
+      const user = await Users.findById(userId)
+        .select('-password') // Exclure password
+        .populate({
+          path: 'commentaires',
+          populate: { path: 'reviewerId', select: 'nom prenom' },
+        });
+
       if (!user) {
         return res.status(404).json({ error: "Utilisateur non trouvé" });
       }
-  
+
       console.log("Commentaires trouvés:", JSON.stringify(user.commentaires));
       res.json(user.commentaires);
     } catch (error) {
