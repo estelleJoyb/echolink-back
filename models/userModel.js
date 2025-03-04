@@ -30,6 +30,7 @@ const UserSchema = new mongoose.Schema({
   commentaires: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Commentaire',
+    required: false,
   }],
 }, { timestamps: true, toJSON: { getters: true } });
 
