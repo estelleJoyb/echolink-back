@@ -77,4 +77,20 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const verifyToken = async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+  
+    try {
+      jwt.verify(token, process.env.JWT_SECRET);
+      res.status(200).send(true);
+    } catch (err) {
+      console.error("Token verification failed:", err.message);
+      res.status(200).send(false);
+    }
+}
+
+module.exports = { register, login, verifyToken };

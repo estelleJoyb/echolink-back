@@ -5,8 +5,8 @@ const Commentaire = require('../models/commentaireModel');
 const usersController = {
   getUsers: async (req, res) => {
     try {
-      const users = await Users.find().select('-password'); // Exclure le champ password
-
+      const users = await Users.find().select('-password');
+      
       const userPayload = users.map((user) => ({
         id: user._id,
         nom: user.nom,
@@ -25,7 +25,7 @@ const usersController = {
       const conversations = await Conversation.find({ participants: req.params.userId })
         .populate({
           path: "participants",
-          select: "nom prenom image", // Exclure password pour les participants
+          select: "nom prenom image",
         })
         .populate("lastMessage");
       res.json(conversations);
@@ -35,9 +35,9 @@ const usersController = {
   },
   getUserById: async (req, res) => {
     try {
-      const user = await Users.findById(req.params.userId).select('-password'); // Exclure password
+      const user = await Users.findById(req.params.userId).select('-password');
       if (!user) {
-        return res.status(404).send("Utilisateur introuvable"); // Changé 400 en 404 pour cohérence
+        return res.status(404).send("Utilisateur introuvable");
       }
       res.json(user);
     } catch (error) {
@@ -91,7 +91,6 @@ const usersController = {
       user.commentaires.push(savedComment._id);
       await user.save();
 
-      // Renvoyer l’utilisateur mis à jour sans le password
       const updatedUser = await Users.findById(userId)
         .select('-password')
         .populate({
@@ -111,7 +110,7 @@ const usersController = {
       console.log("Récupération des avis pour l'utilisateur:", userId);
 
       const user = await Users.findById(userId)
-        .select('-password') // Exclure password
+        .select('-password')
         .populate({
           path: 'commentaires',
           populate: { path: 'reviewerId', select: 'nom prenom' },
