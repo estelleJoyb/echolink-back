@@ -10,6 +10,18 @@ const thematiqueController = {
             res.status(500).json({ error: 'Erreur lors du chargement des thematiques' });
         }
     },
+    getThematiqueByID: async (req, res) => {
+        try {
+            const id = req.params.id;
+            const thematique = await Thematique.findById(thematiques);
+            if(!thematique){
+                return res.status(404).json({error: 'Thematique non trouvée'});
+            }
+            res.json(thematique);
+        } catch (error) {
+            res.status(500).json({ error: 'Erreur lors du chargement de la thématique' });
+        }
+    },
     createThematique: async (req, res) => {
         try {
             const {titre} = req.body;
