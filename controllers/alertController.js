@@ -1,10 +1,15 @@
 const Alert = require("../models/AlertModel");
+const socketService = require('../services/socketService');
 
 const alertController = {
     createAlert: async (req, res) => {
      try {
         const newAlert = new Alert(req.body);
         const savedAlert = await newAlert.save();
+
+        //emit the alert to all connected users
+         socketService.getIO().emit('newAlert', savedAlert);
+
         res.status(201).json(savedAlert);
      }  catch(error){
          res.status(500).json({ error: `Erreur serveur lors de la creation de l'alerte ${error.message}` });
@@ -36,6 +41,10 @@ const alertController = {
                 { new: true }
             );
             if (!updatedAlert) return res.status(404).json({ message: 'Alert not found' });
+
+            //emit the alert to all connected users
+            socketService.getIO().emit('alertResolved', updatedAlert);
+
             res.status(200).json(updatedAlert);
         } catch (error) {
             res.status(500).json({ message: error.message });
