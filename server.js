@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const socketService = require("./services/socketService");
+const alertRoutes = require("./routes/alertRoute");
 const authRoutes = require("./routes/authRoute");
 const usersRoutes = require("./routes/usersRoute");
 const conversationRoutes = require("./routes/conversationRoute");
@@ -37,6 +38,7 @@ connectDB()
 
 app.use("/uploads", authMiddleware, express.static("uploads"));
 app.use("/api/auth", authRoutes);
+app.use("/api/alerts", authMiddleware, alertRoutes);
 app.use("/api/users", authMiddleware, usersRoutes);
 app.use("/api/conversations", authMiddleware, conversationRoutes);
 app.use("/api/forums", authMiddleware, forumRoutes);
