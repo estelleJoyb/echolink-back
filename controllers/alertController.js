@@ -7,8 +7,13 @@ const alertController = {
         const newAlert = new Alert(req.body);
         const savedAlert = await newAlert.save();
 
-        //emit the alert to all connected users
-         socketService.getIO().emit('newAlert', savedAlert);
+         // Get socket instance
+         const io = socketService.getIO();
+
+         //emit the alert to all connected users
+         socketService.connectedUsers.forEach((socketId, userId) => {
+             io.to(userId).emit('new_alert', savedAlert);
+         });
 
         res.status(201).json(savedAlert);
      }  catch(error){
@@ -26,7 +31,7 @@ const alertController = {
     },
     getAlertById: async (req, res) => {
         try {
-            const alert = await Alert.findById(req.params.id);
+            const alert = await Alert.findById(req.params.alertId);
             if (!alert) return res.status(404).json({ message: 'Alert not found' });
             res.status(200).json(alert);
         } catch (error) {
@@ -36,14 +41,19 @@ const alertController = {
     resolveAlert: async (req, res) => {
         try {
             const updatedAlert = await Alert.findByIdAndUpdate(
-                req.params.id,
+                req.params.alertId,
                 { treated: true },
                 { new: true }
             );
             if (!updatedAlert) return res.status(404).json({ message: 'Alert not found' });
 
+            // Get socket instance
+            const io = socketService.getIO();
+
             //emit the alert to all connected users
-            socketService.getIO().emit('alertResolved', updatedAlert);
+            socketService.connectedUsers.forEach((socketId, userId) => {
+                io.to(userId).emit('alert_resolved', updatedAlert);
+            });
 
             res.status(200).json(updatedAlert);
         } catch (error) {

@@ -8,6 +8,6 @@ router.get('/:alertId', alertController.getAlertById);
 
 router.post('/', alertController.createAlert);
 
-router.post('/resolve/:alertId/message', alertController.resolveAlert);
+router.post('/resolve/:alertId', alertController.resolveAlert);
 
 module.exports = router;
