@@ -10,4 +10,7 @@ router.post('/', alertController.createAlert);
 
 router.post('/resolve/:alertId', alertController.resolveAlert);
 
+// New route for nearby alerts
+router.get('/nearby/:coords/:distance', alertController.getNearbyAlerts);
+
 module.exports = router;
